@@ -1,0 +1,25 @@
+version: '2'
+services:
+  servicenetauth-app:
+    image: servicenetauth
+    environment:
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+      - SPRING_PROFILES_ACTIVE=prod,swagger
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://servicenetauth-postgresql:5432/ServiceNetAuth
+      - JHIPSTER_SLEEP=30 # gives time for other services to boot before the application
+  servicenetauth-postgresql:
+    extends:
+      file: postgresql.yml
+      service: servicenetauth-postgresql
+  consul:
+    extends:
+      file: consul.yml
+      service: consul
+
+  consul-config-loader:
+    extends:
+      file: consul.yml
+      service: consul-config-loader
