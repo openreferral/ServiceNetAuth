@@ -1,9 +1,11 @@
 package org.benetech.servicenet.repository.timezone;
 
+import java.util.UUID;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.*;
 import java.util.Objects;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "jhi_date_time_wrapper")
@@ -12,9 +14,12 @@ public class DateTimeWrapper implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID id;
 
     @Column(name = "instant")
     private Instant instant;
@@ -37,11 +42,11 @@ public class DateTimeWrapper implements Serializable {
     @Column(name = "local_date")
     private LocalDate localDate;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

@@ -1,5 +1,6 @@
 package org.benetech.servicenet.web.rest;
 
+import java.util.UUID;
 import org.benetech.servicenet.ServiceNetAuthApp;
 import io.github.jhipster.config.JHipsterProperties;
 import org.benetech.servicenet.config.audit.AuditEventConverter;
@@ -121,7 +122,7 @@ public class AuditResourceIT {
     @Test
     public void getNonExistingAudit() throws Exception {
         // Get the audit
-        restAuditMockMvc.perform(get("/management/audits/{id}", Long.MAX_VALUE))
+        restAuditMockMvc.perform(get("/management/audits/{id}", UUID.randomUUID().toString()))
             .andExpect(status().isNotFound());
     }
 
@@ -130,11 +131,11 @@ public class AuditResourceIT {
     public void testPersistentAuditEventEquals() throws Exception {
         TestUtil.equalsVerifier(PersistentAuditEvent.class);
         PersistentAuditEvent auditEvent1 = new PersistentAuditEvent();
-        auditEvent1.setId(1L);
+        auditEvent1.setId(UUID.randomUUID());
         PersistentAuditEvent auditEvent2 = new PersistentAuditEvent();
         auditEvent2.setId(auditEvent1.getId());
         assertThat(auditEvent1).isEqualTo(auditEvent2);
-        auditEvent2.setId(2L);
+        auditEvent2.setId(UUID.randomUUID());
         assertThat(auditEvent1).isNotEqualTo(auditEvent2);
         auditEvent1.setId(null);
         assertThat(auditEvent1).isNotEqualTo(auditEvent2);

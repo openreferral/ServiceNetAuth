@@ -1,5 +1,6 @@
 package org.benetech.servicenet.config.timezone;
 
+import java.util.UUID;
 import org.benetech.servicenet.ServiceNetAuthApp;
 import org.benetech.servicenet.repository.timezone.DateTimeWrapper;
 import org.benetech.servicenet.repository.timezone.DateTimeWrapperRepository;
@@ -20,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Integration tests for the UTC Hibernate configuration.
  */
-@SpringBootTest(classes = ServiceNetAuthApp.class)
+@SpringBootTest(classes = {ServiceNetAuthApp.class})
 public class HibernateTimeZoneIT {
 
     @Autowired
@@ -158,8 +159,8 @@ public class HibernateTimeZoneIT {
         assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(resultSet, expectedValue);
     }
 
-    private String generateSqlRequest(String fieldName, long id) {
-        return format("SELECT %s FROM jhi_date_time_wrapper where id=%d", fieldName, id);
+    private String generateSqlRequest(String fieldName, UUID id) {
+        return format("SELECT %s FROM jhi_date_time_wrapper where id='%s'", fieldName, id.toString());
     }
 
     private void assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(SqlRowSet sqlRowSet, String expectedValue) {

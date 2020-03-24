@@ -39,9 +39,9 @@ spring:
       port: 8500
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5432/ServiceNetAuth
-    username: ServiceNetAuth
-    password:
+    url: jdbc:postgresql://localhost:5432/ServiceNet?currentSchema=auth
+    username: postgres
+    password: password
     hikari:
       poolName: Hikari
       auto-commit: false
@@ -67,6 +67,7 @@ spring:
   # Replace by 'prod, faker' to add the faker context and have sample data loaded in production
   liquibase:
     contexts: prod
+      default-schema: auth
   mail:
     host: localhost
     port: 25

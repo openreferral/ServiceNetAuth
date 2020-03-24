@@ -1,5 +1,6 @@
 package org.benetech.servicenet.web.rest;
 
+import java.util.UUID;
 import org.benetech.servicenet.service.AuditEventService;
 
 import io.github.jhipster.web.util.PaginationUtil;
@@ -73,7 +74,7 @@ public class AuditResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the {@link AuditEvent} in body, or status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id:.+}")
-    public ResponseEntity<AuditEvent> get(@PathVariable Long id) {
+    public ResponseEntity<AuditEvent> get(@PathVariable UUID id) {
         return ResponseUtil.wrapOrNotFound(auditEventService.find(id));
     }
 }

@@ -1,6 +1,7 @@
 package org.benetech.servicenet.service;
 
 import io.github.jhipster.config.JHipsterProperties;
+import java.util.UUID;
 import org.benetech.servicenet.config.audit.AuditEventConverter;
 import org.benetech.servicenet.repository.PersistenceAuditEventRepository;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class AuditEventService {
             .map(auditEventConverter::convertToAuditEvent);
     }
 
-    public Optional<AuditEvent> find(Long id) {
+    public Optional<AuditEvent> find(UUID id) {
         return persistenceAuditEventRepository.findById(id)
             .map(auditEventConverter::convertToAuditEvent);
     }

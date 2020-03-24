@@ -1,5 +1,6 @@
 package org.benetech.servicenet.service.mapper;
 
+import java.util.UUID;
 import org.benetech.servicenet.domain.User;
 import org.benetech.servicenet.service.dto.UserDTO;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -19,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserMapperTest {
 
     private static final String DEFAULT_LOGIN = "johndoe";
-    private static final Long DEFAULT_ID = 1L;
+    private static final UUID DEFAULT_ID = UUID.randomUUID();
 
     private UserMapper userMapper;
     private User user;

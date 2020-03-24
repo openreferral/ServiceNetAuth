@@ -1,5 +1,6 @@
 package org.benetech.servicenet.repository;
 
+import java.util.UUID;
 import org.benetech.servicenet.domain.User;
 
 import org.springframework.cache.annotation.Cacheable;
@@ -18,7 +19,7 @@ import java.time.Instant;
  * Spring Data JPA repository for the {@link User} entity.
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, UUID> {
 
     String USERS_BY_LOGIN_CACHE = "usersByLogin";
 
@@ -35,7 +36,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findOneByLogin(String login);
 
     @EntityGraph(attributePaths = "authorities")
-    Optional<User> findOneWithAuthoritiesById(Long id);
+    Optional<User> findOneWithAuthoritiesById(UUID id);
 
     @EntityGraph(attributePaths = "authorities")
     @Cacheable(cacheNames = USERS_BY_LOGIN_CACHE)
