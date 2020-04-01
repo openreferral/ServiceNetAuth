@@ -1,7 +1,9 @@
 package org.benetech.servicenet.config;
 
+import javax.sql.DataSource;
 import org.benetech.servicenet.security.AuthoritiesConstants;
 import io.github.jhipster.config.JHipsterProperties;
+import org.benetech.servicenet.service.ClientService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,7 +15,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -39,10 +40,6 @@ import java.util.Collection;
 @Configuration
 @EnableAuthorizationServer
 public class UaaConfiguration extends AuthorizationServerConfigurerAdapter implements ApplicationContextAware {
-    /**
-     * Access tokens will not expire any earlier than this.
-     */
-    private static final int MIN_ACCESS_TOKEN_VALIDITY_SECS = 60;
 
     private ApplicationContext applicationContext;
 
@@ -102,44 +99,23 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
         }
     }
 
-    private final JHipsterProperties jHipsterProperties;
-
     private final UaaProperties uaaProperties;
 
-    private final PasswordEncoder passwordEncoder;
+    private final DataSource dataSource;
 
-    public UaaConfiguration(JHipsterProperties jHipsterProperties, UaaProperties uaaProperties, PasswordEncoder passwordEncoder) {
-        this.jHipsterProperties = jHipsterProperties;
+    private final ClientService clientService;
+
+    public UaaConfiguration(UaaProperties uaaProperties,
+        DataSource dataSource, ClientService clientService) {
         this.uaaProperties = uaaProperties;
-        this.passwordEncoder = passwordEncoder;
+        this.dataSource = dataSource;
+        this.clientService = clientService;
     }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        int accessTokenValidity = uaaProperties.getWebClientConfiguration().getAccessTokenValidityInSeconds();
-        accessTokenValidity = Math.max(accessTokenValidity, MIN_ACCESS_TOKEN_VALIDITY_SECS);
-        int refreshTokenValidity = uaaProperties.getWebClientConfiguration().getRefreshTokenValidityInSecondsForRememberMe();
-        refreshTokenValidity = Math.max(refreshTokenValidity, accessTokenValidity);
-        /*
-        For a better client design, this should be done by a ClientDetailsService (similar to UserDetailsService).
-         */
-        clients.inMemory()
-            .withClient(uaaProperties.getWebClientConfiguration().getClientId())
-            .secret(passwordEncoder.encode(uaaProperties.getWebClientConfiguration().getSecret()))
-            .scopes("openid")
-            .autoApprove(true)
-            .authorizedGrantTypes("implicit","refresh_token", "password", "authorization_code")
-            .accessTokenValiditySeconds(accessTokenValidity)
-            .refreshTokenValiditySeconds(refreshTokenValidity)
-            .and()
-            .withClient(jHipsterProperties.getSecurity().getClientAuthorization().getClientId())
-            .secret(passwordEncoder.encode(jHipsterProperties.getSecurity().getClientAuthorization().getClientSecret()))
-            .scopes("web-app")
-            .authorities("ROLE_ADMIN")
-            .autoApprove(true)
-            .authorizedGrantTypes("client_credentials")
-            .accessTokenValiditySeconds((int) jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds())
-            .refreshTokenValiditySeconds((int) jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSecondsForRememberMe());
+        clientService.createInitialClients();
+        clients.jdbc(dataSource);
     }
 
     @Override
