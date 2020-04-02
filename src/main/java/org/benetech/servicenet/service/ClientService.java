@@ -106,7 +106,7 @@ public class ClientService {
 
         createOrUpdateClient(
             uaaProperties.getWebClientConfiguration().getClientId(),
-            passwordEncoder.encode(uaaProperties.getWebClientConfiguration().getSecret()),
+            uaaProperties.getWebClientConfiguration().getSecret(),
             "openid",
             "implicit,refresh_token,password,authorization_code",
             accessTokenValidity,
@@ -115,7 +115,7 @@ public class ClientService {
         );
         createOrUpdateClient(
             jHipsterProperties.getSecurity().getClientAuthorization().getClientId(),
-            passwordEncoder.encode(jHipsterProperties.getSecurity().getClientAuthorization().getClientSecret()),
+            jHipsterProperties.getSecurity().getClientAuthorization().getClientSecret(),
             "web-app",
             "client_credentials",
             (int) jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds(),
