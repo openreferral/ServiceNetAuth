@@ -114,7 +114,7 @@ jhipster:
   security:
     client-authorization:
       client-id: internal
-      client-secret: changeme
+      client-secret: ${JHIPSTER_OAUTH2_CLIENT_SECRET:changeme}
   mail: # specific JHipster mail property, for standard properties see MailProperties
     base-url: http://127.0.0.1:9000
   metrics:
@@ -141,7 +141,7 @@ uaa:
     # Refresh Token is valid for 7 days
     refresh-token-validity-in-seconds-for-remember-me: 604800
     client-id: web_app
-    secret: changeme
+    secret: ${SPRING_OAUTH2_CLIENT_SECRET:changeme}
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
