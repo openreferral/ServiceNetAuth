@@ -1,7 +1,6 @@
 package org.benetech.servicenet.service;
 
 import io.github.jhipster.config.JHipsterProperties;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -105,34 +104,24 @@ public class ClientService {
         int refreshTokenValidity = uaaProperties.getWebClientConfiguration().getRefreshTokenValidityInSecondsForRememberMe();
         refreshTokenValidity = Math.max(refreshTokenValidity, accessTokenValidity);
 
-        String clientId = uaaProperties.getWebClientConfiguration().getClientId();
-        if (!clientRepository.findById(clientId).isPresent()) {
-            Client client = new Client(
-                clientId,
-                passwordEncoder.encode(uaaProperties.getWebClientConfiguration().getSecret()),
-                "openid",
-                "implicit,refresh_token,password,authorization_code",
-                true,
-                accessTokenValidity,
-                refreshTokenValidity,
-                null
-            );
-            clientRepository.save(client);
-        }
-        clientId = jHipsterProperties.getSecurity().getClientAuthorization().getClientId();
-        if (!clientRepository.findById(clientId).isPresent()) {
-            Client client = new Client(
-                clientId,
-                passwordEncoder.encode(jHipsterProperties.getSecurity().getClientAuthorization().getClientSecret()),
-                "web-app",
-                "client_credentials",
-                true,
-                (int) jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds(),
-                (int) jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSecondsForRememberMe(),
-                "ROLE_ADMIN"
-            );
-            clientRepository.save(client);
-        }
+        createOrUpdateClient(
+            uaaProperties.getWebClientConfiguration().getClientId(),
+            passwordEncoder.encode(uaaProperties.getWebClientConfiguration().getSecret()),
+            "openid",
+            "implicit,refresh_token,password,authorization_code",
+            accessTokenValidity,
+            refreshTokenValidity,
+            null
+        );
+        createOrUpdateClient(
+            jHipsterProperties.getSecurity().getClientAuthorization().getClientId(),
+            passwordEncoder.encode(jHipsterProperties.getSecurity().getClientAuthorization().getClientSecret()),
+            "web-app",
+            "client_credentials",
+            (int) jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds(),
+            (int) jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSecondsForRememberMe(),
+            "ROLE_ADMIN"
+        );
     }
 
     public ClientDTO toDto(Client client) {
@@ -140,5 +129,26 @@ public class ClientService {
         clientDTO.setClientId(client.getClientId());
         clientDTO.setTokenValiditySeconds(client.getAccessTokenValiditySeconds());
         return clientDTO;
+    }
+
+    private void createOrUpdateClient(String clientId, String clientSecret, String scope,
+        String authorizedGrantTypes,
+        int accessTokenValidity, int refreshTokenValidity, String authorities) {
+        Optional<Client> clientOptional = clientRepository.findById(clientId);
+        Client client;
+        if (clientOptional.isPresent()) {
+            client = clientOptional.get();
+        } else {
+            client = new Client();
+            client.setClientId(clientId);
+        }
+        client.setClientSecret(passwordEncoder.encode(clientSecret));
+        client.setScope(scope);
+        client.setAuthorizedGrantTypes(authorizedGrantTypes);
+        client.setAutoApprove(Boolean.toString(true));
+        client.setAccessTokenValiditySeconds(accessTokenValidity);
+        client.setRefreshTokenValiditySeconds(refreshTokenValidity);
+        client.setAuthorities(authorities);
+        clientRepository.save(client);
     }
 }
