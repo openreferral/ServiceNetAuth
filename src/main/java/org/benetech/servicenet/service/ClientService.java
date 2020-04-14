@@ -3,13 +3,14 @@ package org.benetech.servicenet.service;
 import io.github.jhipster.config.JHipsterProperties;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.benetech.servicenet.config.UaaProperties;
 import org.benetech.servicenet.domain.Client;
 import org.benetech.servicenet.repository.ClientRepository;
 import org.benetech.servicenet.security.AuthoritiesConstants;
 import org.benetech.servicenet.service.dto.ClientDTO;
-import org.mapstruct.ap.internal.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,8 +95,9 @@ public class ClientService {
     }
 
     public Set<String> getInitialClientIds() {
-        return Collections.asSet(uaaProperties.getWebClientConfiguration().getClientId(),
-            jHipsterProperties.getSecurity().getClientAuthorization().getClientId());
+        return Stream.of(uaaProperties.getWebClientConfiguration().getClientId(),
+            jHipsterProperties.getSecurity().getClientAuthorization().getClientId()).collect(
+            Collectors.toSet());
     }
 
     public void createInitialClients() {
