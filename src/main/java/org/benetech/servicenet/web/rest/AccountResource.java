@@ -7,6 +7,7 @@ import org.benetech.servicenet.service.MailService;
 import org.benetech.servicenet.service.UserService;
 import org.benetech.servicenet.service.dto.PasswordChangeDTO;
 import org.benetech.servicenet.service.dto.UserDTO;
+import org.benetech.servicenet.service.mapper.UserMapper;
 import org.benetech.servicenet.web.rest.errors.*;
 import org.benetech.servicenet.web.rest.vm.KeyAndPasswordVM;
 import org.benetech.servicenet.web.rest.vm.ManagedUserVM;
@@ -42,11 +43,14 @@ public class AccountResource {
 
     private final MailService mailService;
 
-    public AccountResource(UserRepository userRepository, UserService userService, MailService mailService) {
+    private final UserMapper userMapper;
+
+    public AccountResource(UserRepository userRepository, UserService userService, MailService mailService, UserMapper userMapper) {
 
         this.userRepository = userRepository;
         this.userService = userService;
         this.mailService = mailService;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -59,12 +63,13 @@ public class AccountResource {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
+    public UserDTO registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
         if (!checkPasswordLength(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
         mailService.sendActivationEmail(user);
+        return userMapper.userToUserDTO(user);
     }
 
     /**
