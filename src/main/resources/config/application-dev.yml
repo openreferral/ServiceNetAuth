@@ -136,10 +136,10 @@ uaa:
     password: password
     alias: selfsigned
   web-client-configuration:
-    # Access Token is valid for 5 mins
-    access-token-validity-in-seconds: 300
+    # Access Token is valid for 1 hour
+    access-token-validity-in-seconds: ${SPRING_OAUTH2_ACCESS_TOKEN_VALIDITY:3600}
     # Refresh Token is valid for 7 days
-    refresh-token-validity-in-seconds-for-remember-me: 604800
+    refresh-token-validity-in-seconds-for-remember-me: ${SPRING_OAUTH2_REFRESH_TOKEN_VALIDITY:604800}
     client-id: web_app
     secret: ${SPRING_OAUTH2_CLIENT_SECRET:changeme}
 # ===================================================================
