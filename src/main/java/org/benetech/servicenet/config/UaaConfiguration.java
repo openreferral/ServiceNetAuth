@@ -69,8 +69,6 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
                 .exceptionHandling()
                 .authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
             .and()
-                .csrf()
-                .disable()
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers()
                 .frameOptions()
