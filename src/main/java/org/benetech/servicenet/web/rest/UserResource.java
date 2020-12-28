@@ -5,6 +5,7 @@ import org.benetech.servicenet.domain.User;
 import org.benetech.servicenet.repository.UserRepository;
 import org.benetech.servicenet.security.AuthoritiesConstants;
 import org.benetech.servicenet.service.MailService;
+import org.benetech.servicenet.service.SendGridMailServiceImpl;
 import org.benetech.servicenet.service.UserService;
 import org.benetech.servicenet.service.dto.UserDTO;
 import org.benetech.servicenet.web.rest.errors.BadRequestAlertException;
@@ -17,6 +18,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,6 +73,9 @@ public class UserResource {
 
     private final MailService mailService;
 
+    @Autowired
+    private SendGridMailServiceImpl sendGridMailService;
+
     public UserResource(UserService userService, UserRepository userRepository, MailService mailService) {
         this.userService = userService;
         this.userRepository = userRepository;
@@ -103,7 +108,7 @@ public class UserResource {
             throw new EmailAlreadyUsedException();
         } else {
             User newUser = userService.createUser(userDTO);
-            mailService.sendCreationEmail(newUser);
+            sendGridMailService.sendCreationEmail(newUser);
             return ResponseEntity.created(new URI("/api/users/" + newUser.getLogin()))
                 .headers(HeaderUtil.createAlert(applicationName,  "A user is created with identifier " + newUser.getLogin(), newUser.getLogin()))
                 .body(newUser);

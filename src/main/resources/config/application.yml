@@ -105,6 +105,8 @@ spring:
   output:
     ansi:
       console-available: true
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY:default_key}
 
 server:
   servlet:
@@ -168,3 +170,5 @@ jhipster:
 # ===================================================================
 
 # application:
+registration:
+  sender-address: ${REGISTRATION_SENDER_ADDRESS:servicenetaccounts@benetech.org}
