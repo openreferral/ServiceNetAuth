@@ -7,6 +7,7 @@ import org.benetech.servicenet.service.MailService;
 import org.benetech.servicenet.service.SendGridMailServiceImpl;
 import org.benetech.servicenet.service.UserService;
 import org.benetech.servicenet.service.dto.PasswordChangeDTO;
+import org.benetech.servicenet.service.dto.ResetPasswordDto;
 import org.benetech.servicenet.service.dto.UserDTO;
 import org.benetech.servicenet.service.mapper.UserMapper;
 import org.benetech.servicenet.web.rest.errors.*;
@@ -73,7 +74,7 @@ public class AccountResource {
             throw new InvalidPasswordException();
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
-        sendGridMailService.sendActivationEmail(user);
+        mailService.sendActivationEmail(user);
         return userMapper.userToUserDTO(user);
     }
 
@@ -154,17 +155,17 @@ public class AccountResource {
     /**
      * {@code POST   /account/reset-password/init} : Send an email to reset the password of the user.
      *
-     * @param mail the mail of the user.
+     * @param resetPasswordDto the mail of the user and base url of the app.
      */
     @PostMapping(path = "/account/reset-password/init")
-    public void requestPasswordReset(@RequestBody String mail) {
-        Optional<User> user = userService.requestPasswordReset(mail);
+    public void requestPasswordReset(@RequestBody ResetPasswordDto resetPasswordDto) {
+        Optional<User> user = userService.requestPasswordReset(resetPasswordDto.getMail());
         if (user.isPresent()) {
-            sendGridMailService.sendPasswordResetMail(user.get());
+            sendGridMailService.sendPasswordResetMail(user.get(), resetPasswordDto.getBaseUrl());
         } else {
             // Pretend the request has been successful to prevent checking which emails really exist
             // but log that an invalid attempt has been made
-            log.warn("Password reset requested for non existing mail '{}'", mail);
+            log.warn("Password reset requested for non existing mail '{}'", resetPasswordDto.getMail());
         }
     }
 
