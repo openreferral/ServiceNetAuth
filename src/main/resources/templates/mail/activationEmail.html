@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}" lang="en">
     <head>
-        <title th:text="#{email.activation.title}">JHipster activation</title>
+        <title th:text="#{email.activation.title}">Benetech ServiceNet activation</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     </head>
     <body>
@@ -9,16 +9,16 @@
             Dear
         </p>
         <p th:text="#{email.activation.text1}">
-            Your JHipster account has been created, please click on the URL below to activate it:
+            Your Benetech ServiceNet account has been created, please click on the URL below to activate it:
         </p>
         <p>
             <a th:with="url=(@{|${baseUrl}/#/activate?key=${user.activationKey}|})" th:href="${url}"
             th:text="${url}">Activation link</a>
         </p>
         <p>
-            <span th:text="#{email.activation.text2}">Regards, </span>
+            <span>Regards, </span>
             <br/>
-            <em th:text="#{email.signature}">JHipster.</em>
+            <span>Benetech ServiceNet Team.</span>
         </p>
     </body>
 </html>
