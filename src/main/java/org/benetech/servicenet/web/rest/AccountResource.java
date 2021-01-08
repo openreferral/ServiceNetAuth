@@ -185,7 +185,7 @@ public class AccountResource {
             userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey());
 
         if (!user.isPresent()) {
-            throw new AccountResourceException("No user was found for this reset key");
+            throw new BadRequestAlertException("Your link has expired. Try again to reset your password", "reset", "linkExpired");
         }
     }
 
