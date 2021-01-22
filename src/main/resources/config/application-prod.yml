@@ -84,6 +84,8 @@ spring:
     locator:
       discovery:
         enabled: true
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY:default_key}
 
 # ===================================================================
 # To enable TLS in production, generate a certificate using:
@@ -179,3 +181,5 @@ uaa:
 # ===================================================================
 
 # application:
+registration:
+  sender-address: ${REGISTRATION_SENDER_ADDRESS:servicenetaccounts@benetech.org}

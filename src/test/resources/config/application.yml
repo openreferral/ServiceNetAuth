@@ -68,6 +68,8 @@ spring:
         size: 1
   thymeleaf:
     mode: HTML
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY:default_key}
 
 server:
   port: 10344
@@ -118,3 +120,5 @@ jhipster:
 # ===================================================================
 
 # application:
+registration:
+  sender-address: ${REGISTRATION_SENDER_ADDRESS:servicenetaccounts@benetech.org}

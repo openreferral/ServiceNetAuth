@@ -12,9 +12,10 @@ import java.io.IOException;
 import java.util.Locale;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.benetech.servicenet.domain.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -23,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
-@Slf4j
 @Service
 public class SendGridMailServiceImpl {
 
@@ -36,6 +36,8 @@ public class SendGridMailServiceImpl {
     private static final String USER = "user";
 
     private static final String BASE_URL = "baseUrl";
+
+    private final Logger log = LoggerFactory.getLogger(SendGridMailServiceImpl.class);
 
     @Autowired
     private MessageSource messageSource;
