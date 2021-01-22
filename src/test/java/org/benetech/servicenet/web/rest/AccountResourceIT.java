@@ -786,6 +786,6 @@ public class AccountResourceIT {
             post("/api/account/reset-password/finish")
                 .contentType(TestUtil.APPLICATION_JSON)
                 .content(TestUtil.convertObjectToJsonBytes(keyAndPassword)))
-            .andExpect(status().isInternalServerError());
+            .andExpect(status().isBadRequest());
     }
 }
