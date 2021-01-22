@@ -1,5 +1,19 @@
 package org.benetech.servicenet.web.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.benetech.servicenet.web.rest.AccountResourceIT.TEST_USER_LOGIN;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.benetech.servicenet.ServiceNetAuthApp;
 import org.benetech.servicenet.config.Constants;
 import org.benetech.servicenet.domain.User;
@@ -8,30 +22,19 @@ import org.benetech.servicenet.repository.UserRepository;
 import org.benetech.servicenet.security.AuthoritiesConstants;
 import org.benetech.servicenet.service.UserService;
 import org.benetech.servicenet.service.dto.PasswordChangeDTO;
+import org.benetech.servicenet.service.dto.ResetPasswordDto;
 import org.benetech.servicenet.service.dto.UserDTO;
 import org.benetech.servicenet.web.rest.vm.KeyAndPasswordVM;
 import org.benetech.servicenet.web.rest.vm.ManagedUserVM;
-import org.apache.commons.lang3.RandomStringUtils;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.benetech.servicenet.web.rest.AccountResourceIT.TEST_USER_LOGIN;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Integration tests for the {@link AccountResource} REST controller.
@@ -684,10 +687,12 @@ public class AccountResourceIT {
         user.setLogin("password-reset");
         user.setEmail("password-reset@example.com");
         userRepository.saveAndFlush(user);
+        ResetPasswordDto resetPasswordDto =
+            new ResetPasswordDto("password-reset@example.com", "localhost");
 
         restAccountMockMvc.perform(post("/api/account/reset-password/init")
-            .content("password-reset@example.com")
-)
+            .contentType(TestUtil.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(resetPasswordDto)))
             .andExpect(status().isOk());
     }
 
@@ -700,18 +705,23 @@ public class AccountResourceIT {
         user.setLogin("password-reset");
         user.setEmail("password-reset@example.com");
         userRepository.saveAndFlush(user);
+        ResetPasswordDto resetPasswordDto =
+            new ResetPasswordDto("password-reset@EXAMPLE.COM", "localhost");
 
         restAccountMockMvc.perform(post("/api/account/reset-password/init")
-            .content("password-reset@EXAMPLE.COM")
-)
+            .contentType(TestUtil.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(resetPasswordDto)))
             .andExpect(status().isOk());
     }
 
     @Test
     public void testRequestPasswordResetWrongEmail() throws Exception {
+        ResetPasswordDto resetPasswordDto =
+            new ResetPasswordDto("password-reset-wrong-email@example.com", "localhost");
         restAccountMockMvc.perform(
             post("/api/account/reset-password/init")
-                .content("password-reset-wrong-email@example.com"))
+                .contentType(TestUtil.APPLICATION_JSON)
+                .content(TestUtil.convertObjectToJsonBytes(resetPasswordDto)))
             .andExpect(status().isOk());
     }
 
