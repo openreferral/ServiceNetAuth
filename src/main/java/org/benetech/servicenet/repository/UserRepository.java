@@ -25,9 +25,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     String USERS_BY_EMAIL_CACHE = "usersByEmail";
 
-    Optional<User> findOneByActivationKey(String activationKey);
+    Optional<User> findOneByVerificationKey(String verificationKey);
 
-    List<User> findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant dateTime);
+    List<User> findAllByActivatedIsFalseAndVerificationKeyIsNotNullAndCreatedDateBefore(Instant dateTime);
 
     Optional<User> findOneByResetKey(String resetKey);
 
