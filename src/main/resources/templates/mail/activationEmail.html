@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}" lang="en">
     <head>
-        <title th:text="#{email.activation.title}">Benetech ServiceNet activation</title>
+        <title th:text="#{email.activation.title}">Service Net Account Approved</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     </head>
     <body>
-        <p th:text="#{email.activation.greeting(${user.login})}">
-            Dear
+        <p th:text="#{email.greeting(${user.getName()})}">
+            Hello
         </p>
         <p th:text="#{email.activation.text1}">
-            Your Benetech ServiceNet account has been created, please click on the URL below to activate it:
+            Thank you for your patience. We have verified and approved your account.
         </p>
         <p>
-            <a th:with="url=(@{|${baseUrl}/#/activate?key=${user.activationKey}|})" th:href="${url}"
-            th:text="${url}">Activation link</a>
+            <span th:text="#{email.activation.text2}">You can log in here:</span>
+            <a th:with="url=(@{|${baseUrl}/#/login|})" th:href="${url}"
+            th:text="ServiceNet">ServiceNet</a>
         </p>
         <p>
-            <span>Regards, </span>
-            <br/>
-            <span>Benetech ServiceNet Team.</span>
+            <span th:text="#{email.signature1}">Thank you, </span>
+            <br />
+            <span th:text="#{email.signature2}">Service Net Team</span>
+            <br />
+            <img src='cid:logo' alt="Service Net"/>
         </p>
     </body>
 </html>

@@ -401,28 +401,28 @@ public class AccountResourceIT {
 
     @Test
     @Transactional
-    public void testActivateAccount() throws Exception {
-        final String activationKey = "some activation key";
+    public void testVerifyAccount() throws Exception {
+        final String verificationKey = "some activation key";
         User user = new User();
         user.setLogin("activate-account");
         user.setEmail("activate-account@example.com");
         user.setPassword(RandomStringUtils.random(60));
         user.setActivated(false);
-        user.setActivationKey(activationKey);
+        user.setVerificationKey(verificationKey);
 
         userRepository.saveAndFlush(user);
 
-        restAccountMockMvc.perform(get("/api/activate?key={activationKey}", activationKey))
+        restAccountMockMvc.perform(get("/api/verify?key={verificationKey}", verificationKey))
             .andExpect(status().isOk());
 
         user = userRepository.findOneByLogin(user.getLogin()).orElse(null);
-        assertThat(user.getActivated()).isTrue();
+        assertThat(user.getVerificationKey()).isNullOrEmpty();
     }
 
     @Test
     @Transactional
-    public void testActivateAccountWithWrongKey() throws Exception {
-        restAccountMockMvc.perform(get("/api/activate?key=wrongActivationKey"))
+    public void testVerifyAccountWithWrongKey() throws Exception {
+        restAccountMockMvc.perform(get("/api/verify?key=wrongVerificationKey"))
             .andExpect(status().isInternalServerError());
     }
 
