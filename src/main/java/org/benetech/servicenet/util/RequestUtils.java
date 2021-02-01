@@ -27,7 +27,7 @@ public class RequestUtils {
             if (StringUtils.isBlank(host)) {
                 host = request.getRemoteHost();
             }
-            return proto + "://" + host;
+            return proto.split(",")[0] + "://" + host;
         }
         return "";
     }
