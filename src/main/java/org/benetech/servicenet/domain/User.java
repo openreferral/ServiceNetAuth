@@ -79,7 +79,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Size(max = 20)
     @Column(name = "activation_key", length = 20)
     @JsonIgnore
-    private String activationKey;
+    private String verificationKey;
 
     @Size(max = 20)
     @Column(name = "reset_key", length = 20)
@@ -164,12 +164,12 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.activated = activated;
     }
 
-    public String getActivationKey() {
-        return activationKey;
+    public String getVerificationKey() {
+        return verificationKey;
     }
 
-    public void setActivationKey(String activationKey) {
-        this.activationKey = activationKey;
+    public void setVerificationKey(String verificationKey) {
+        this.verificationKey = verificationKey;
     }
 
     public String getResetKey() {
@@ -204,6 +204,18 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.authorities = authorities;
     }
 
+    public String getName() {
+        if (StringUtils.isNotBlank(firstName) && StringUtils.isNotBlank(lastName)) {
+            return String.join(" ", firstName, lastName);
+        } else {
+            return login;
+        }
+    }
+
+    public boolean isVerified() {
+        return StringUtils.isBlank(verificationKey);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -230,7 +242,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
             ", imageUrl='" + imageUrl + '\'' +
             ", activated='" + activated + '\'' +
             ", langKey='" + langKey + '\'' +
-            ", activationKey='" + activationKey + '\'' +
+            ", verificationKey='" + verificationKey + '\'' +
             "}";
     }
 }

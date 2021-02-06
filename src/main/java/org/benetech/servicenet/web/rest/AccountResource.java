@@ -10,6 +10,7 @@ import org.benetech.servicenet.service.dto.PasswordChangeDTO;
 import org.benetech.servicenet.service.dto.ResetPasswordDto;
 import org.benetech.servicenet.service.dto.UserDTO;
 import org.benetech.servicenet.service.mapper.UserMapper;
+import org.benetech.servicenet.util.RequestUtils;
 import org.benetech.servicenet.web.rest.errors.*;
 import org.benetech.servicenet.web.rest.vm.KeyAndPasswordVM;
 import org.benetech.servicenet.web.rest.vm.ManagedUserVM;
@@ -73,22 +74,27 @@ public class AccountResource {
         if (!checkPasswordLength(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
+        String baseUri = RequestUtils.getBaseUrl();
+
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
-        mailService.sendActivationEmail(user);
+
+        sendGridMailService.sendVerificationEmail(user, baseUri);
         return userMapper.userToUserDTO(user);
     }
 
     /**
-     * {@code GET  /activate} : activate the registered user.
+     * {@code GET  /verify} : verify the email of a registered user.
      *
-     * @param key the activation key.
+     * @param key the verification key.
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the user couldn't be activated.
      */
-    @GetMapping("/activate")
+    @GetMapping("/verify")
     public void activateAccount(@RequestParam(value = "key") String key) {
-        Optional<User> user = userService.activateRegistration(key);
+        Optional<User> user = userService.verifyEmail(key);
         if (!user.isPresent()) {
-            throw new AccountResourceException("No user was found for this activation key");
+            throw new AccountResourceException("No user was found for this verification key");
+        } else {
+            sendGridMailService.sendCreationEmail(user.get(), RequestUtils.getBaseUrl());
         }
     }
 
@@ -185,7 +191,7 @@ public class AccountResource {
             userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey());
 
         if (!user.isPresent()) {
-            throw new AccountResourceException("No user was found for this reset key");
+            throw new BadRequestAlertException("Your link has expired. Try again to reset your password", "reset", "linkExpired");
         }
     }
 

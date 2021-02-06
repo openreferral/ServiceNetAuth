@@ -5,25 +5,32 @@ import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Attachments;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import io.github.jhipster.config.JHipsterProperties;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.Base64;
 import java.util.Locale;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.benetech.servicenet.domain.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
-@Slf4j
 @Service
 public class SendGridMailServiceImpl {
 
@@ -36,6 +43,8 @@ public class SendGridMailServiceImpl {
     private static final String USER = "user";
 
     private static final String BASE_URL = "baseUrl";
+
+    private final Logger log = LoggerFactory.getLogger(SendGridMailServiceImpl.class);
 
     @Autowired
     private MessageSource messageSource;
@@ -53,12 +62,15 @@ public class SendGridMailServiceImpl {
     private String registrationSenderMail;
 
 
-    private void sendMail(String from, String to, String subj, String content, boolean isHtml) {
+    private void sendMail(String from, String to, String subj, String content, Attachments attachments, boolean isHtml) {
         Email fromEmail = new Email(this.getValidEmailAddress(from));
         Email toEmail = new Email(to);
         String contentType = isHtml ? MAIL_HTML_CONTENT_TYPE : MAIL_CONTENT_TYPE;
         Content mailContent = new Content(contentType, content);
         Mail mail = new Mail(fromEmail, subj, toEmail, mailContent);
+        if (attachments != null) {
+            mail.addAttachments(attachments);
+        }
 
         Request request = new Request();
         try {
@@ -99,20 +111,41 @@ public class SendGridMailServiceImpl {
         context.setVariable(BASE_URL, baseUrl);
         String content = templateEngine.process(templateName, context);
         String subject = messageSource.getMessage(titleKey, null, locale);
-        sendMail(registrationSenderMail, user.getEmail(), subject, content, true);
+
+        ClassPathResource logo = new ClassPathResource("templates/mail/logo.png");
+        Attachments attachments = new Attachments();
+        try (InputStream is = logo.getInputStream()) {
+            byte[] bytes = IOUtils.toByteArray(is);
+            String encoded = Base64.getEncoder().encodeToString(bytes);
+            attachments.setContent(encoded);
+            attachments.setType(Files.probeContentType(logo.getFile().toPath()));
+            attachments.setFilename(logo.getFilename());
+            attachments.setDisposition("inline");
+            attachments.setContentId("logo");
+        } catch (IOException ex) {
+            log.error(ex.getMessage(), ex);
+        }
+        sendMail(registrationSenderMail, user.getEmail(), subject, content, attachments, true);
     }
 
     @Async
-    public void sendActivationEmail(User user, String baseUrl) {
-        log.debug("Sending activation email to '{}'", user.getEmail());
-        sendEmailFromTemplate(user, "mail/activationEmail",
-            "email.activation.title", baseUrl);
+    public void sendVerificationEmail(User user, String baseUrl) {
+        log.debug("Sending verification email to '{}'", user.getEmail());
+        sendEmailFromTemplate(user, "mail/verificationEmail",
+            "email.verification.title", baseUrl);
     }
 
     @Async
     public void sendCreationEmail(User user, String baseUrl) {
         log.debug("Sending creation email to '{}'", user.getEmail());
         sendEmailFromTemplate(user, "mail/creationEmail",
+            "email.creation.title", baseUrl);
+    }
+
+    @Async
+    public void sendActivationEmail(User user, String baseUrl) {
+        log.debug("Sending activation email to '{}'", user.getEmail());
+        sendEmailFromTemplate(user, "mail/activationEmail",
             "email.activation.title", baseUrl);
     }
 
