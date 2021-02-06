@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}" lang="en">
     <head>
-        <title th:text="#{email.creation.title}">Verify Your Email Address for the Service Net account</title>
+        <title th:text="#{email.verification.title}">Service Net Account Waiting Approval</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     </head>
     <body>
         <p th:text="#{email.greeting(${user.getName()})}">
             Hello
         </p>
-        <p th:text="#{email.creation.text1}">
-            Your email has been successfully verified. Please wait for "Account Approval" email notification from Service Net. You can sign in once your account is approved by our staff.
+        <p th:text="#{email.verification.text1}">
+            Your Benetech ServiceNet account has been created, please click on the URL below to activate it:
+        </p>
+        <p>
+            <a th:with="url=(@{|${baseUrl}/#/verify?key=${user.verificationKey}|})" th:href="${url}"
+            th:text="${url}">Activation link</a>
         </p>
         <p>
             <span th:text="#{email.signature1}">Thank you, </span>
-            <br/>
+            <br />
             <span th:text="#{email.signature2}">Service Net Team</span>
             <br />
             <img src='cid:logo' alt="Service Net"/>

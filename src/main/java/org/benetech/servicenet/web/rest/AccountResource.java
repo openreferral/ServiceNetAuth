@@ -4,10 +4,13 @@ import org.benetech.servicenet.domain.User;
 import org.benetech.servicenet.repository.UserRepository;
 import org.benetech.servicenet.security.SecurityUtils;
 import org.benetech.servicenet.service.MailService;
+import org.benetech.servicenet.service.SendGridMailServiceImpl;
 import org.benetech.servicenet.service.UserService;
 import org.benetech.servicenet.service.dto.PasswordChangeDTO;
+import org.benetech.servicenet.service.dto.ResetPasswordDto;
 import org.benetech.servicenet.service.dto.UserDTO;
 import org.benetech.servicenet.service.mapper.UserMapper;
+import org.benetech.servicenet.util.RequestUtils;
 import org.benetech.servicenet.web.rest.errors.*;
 import org.benetech.servicenet.web.rest.vm.KeyAndPasswordVM;
 import org.benetech.servicenet.web.rest.vm.ManagedUserVM;
@@ -15,11 +18,11 @@ import org.benetech.servicenet.web.rest.vm.ManagedUserVM;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -46,6 +49,9 @@ public class AccountResource {
 
     private final UserMapper userMapper;
 
+    @Autowired
+    private SendGridMailServiceImpl sendGridMailService;
+
     public AccountResource(UserRepository userRepository, UserService userService, MailService mailService, UserMapper userMapper) {
 
         this.userRepository = userRepository;
@@ -68,22 +74,27 @@ public class AccountResource {
         if (!checkPasswordLength(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
+        String baseUri = RequestUtils.getBaseUrl();
+
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
-        mailService.sendActivationEmail(user);
+
+        sendGridMailService.sendVerificationEmail(user, baseUri);
         return userMapper.userToUserDTO(user);
     }
 
     /**
-     * {@code GET  /activate} : activate the registered user.
+     * {@code GET  /verify} : verify the email of a registered user.
      *
-     * @param key the activation key.
+     * @param key the verification key.
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the user couldn't be activated.
      */
-    @GetMapping("/activate")
+    @GetMapping("/verify")
     public void activateAccount(@RequestParam(value = "key") String key) {
-        Optional<User> user = userService.activateRegistration(key);
+        Optional<User> user = userService.verifyEmail(key);
         if (!user.isPresent()) {
-            throw new AccountResourceException("No user was found for this activation key");
+            throw new AccountResourceException("No user was found for this verification key");
+        } else {
+            sendGridMailService.sendCreationEmail(user.get(), RequestUtils.getBaseUrl());
         }
     }
 
@@ -150,17 +161,17 @@ public class AccountResource {
     /**
      * {@code POST   /account/reset-password/init} : Send an email to reset the password of the user.
      *
-     * @param mail the mail of the user.
+     * @param resetPasswordDto the mail of the user and base url of the app.
      */
     @PostMapping(path = "/account/reset-password/init")
-    public void requestPasswordReset(@RequestBody String mail) {
-        Optional<User> user = userService.requestPasswordReset(mail);
+    public void requestPasswordReset(@RequestBody ResetPasswordDto resetPasswordDto) {
+        Optional<User> user = userService.requestPasswordReset(resetPasswordDto.getMail());
         if (user.isPresent()) {
-            mailService.sendPasswordResetMail(user.get());
+            sendGridMailService.sendPasswordResetMail(user.get(), resetPasswordDto.getBaseUrl());
         } else {
             // Pretend the request has been successful to prevent checking which emails really exist
             // but log that an invalid attempt has been made
-            log.warn("Password reset requested for non existing mail '{}'", mail);
+            log.warn("Password reset requested for non existing mail '{}'", resetPasswordDto.getMail());
         }
     }
 
@@ -180,7 +191,7 @@ public class AccountResource {
             userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey());
 
         if (!user.isPresent()) {
-            throw new AccountResourceException("No user was found for this reset key");
+            throw new BadRequestAlertException("Your link has expired. Try again to reset your password", "reset", "linkExpired");
         }
     }
 

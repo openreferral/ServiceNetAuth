@@ -36,6 +36,8 @@ public class UserDTO {
     @Size(max = 256)
     private String imageUrl;
 
+    private boolean verified = false;
+
     private boolean activated = false;
 
     @Size(min = 2, max = 10)
@@ -62,6 +64,7 @@ public class UserDTO {
         this.lastName = user.getLastName();
         this.email = user.getEmail();
         this.activated = user.getActivated();
+        this.verified = user.isVerified();
         this.imageUrl = user.getImageUrl();
         this.langKey = user.getLangKey();
         this.createdBy = user.getCreatedBy();
@@ -127,6 +130,14 @@ public class UserDTO {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
     }
 
     public String getLangKey() {
