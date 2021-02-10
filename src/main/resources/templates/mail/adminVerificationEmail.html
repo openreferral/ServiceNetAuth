@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}" lang="en">
+<head>
+    <title th:text="#{email.adminVerification.title}">New Registration for approval</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<p th:text="#{email.greeting(${name})}">
+    Hello
+</p>
+<p>
+    <span th:text="#{email.adminVerification.text1}">
+        A new user registration is waiting for account approval with the following details:
+    </span>
+    <br />
+    <span th:text="#{email.adminVerification.emailAddress}">Email Address</span>: <span th:text="${user.email}"></span><br />
+    <span th:text="#{email.adminVerification.firstName}">First Name</span>: <span th:text="${user.firstName}"></span><br />
+    <span th:text="#{email.adminVerification.lastName}">Last Name</span>: <span th:text="${user.lastName}"></span><br />
+    <span th:text="#{email.adminVerification.login}">Login</span>: <span th:text="${user.login}"></span>
+</p>
+<p>
+    <a th:text="#{email.adminVerification.approve}"
+       th:with="url=(@{|${baseUrl}/#/admin/user-management?sort=createdDate,desc|})"
+       th:href="${url}">
+        Approve Account
+    </a>
+</p>
+<p>
+    <span th:text="#{email.signature1}">Thank you, </span>
+    <br/>
+    <span th:text="#{email.signature2}">Service Net Team</span>
+    <br />
+    <img src='cid:logo' alt="Service Net"/>
+</p>
+</body>
+</html>
