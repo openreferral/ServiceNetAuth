@@ -2,6 +2,7 @@ package org.benetech.servicenet.web.rest;
 
 import org.benetech.servicenet.domain.User;
 import org.benetech.servicenet.repository.UserRepository;
+import org.benetech.servicenet.security.AuthoritiesConstants;
 import org.benetech.servicenet.security.SecurityUtils;
 import org.benetech.servicenet.service.MailService;
 import org.benetech.servicenet.service.SendGridMailServiceImpl;
@@ -94,7 +95,17 @@ public class AccountResource {
         if (!user.isPresent()) {
             throw new AccountResourceException("No user was found for this verification key");
         } else {
-            sendGridMailService.sendCreationEmail(user.get(), RequestUtils.getBaseUrl());
+            String baseUrl = RequestUtils.getBaseUrl();
+            // send 'waiting for verification by administrator' email to the user
+            sendGridMailService.sendCreationEmail(user.get(), baseUrl);
+            // send the admin verification notification to feedback receiver (feedback@benetech.org)
+            sendGridMailService.sendAdminVerificationEmail(null, user.get(), baseUrl);
+            // send the admin verification notification to all the administrators
+            userRepository.findAllByAuthoritiesName(AuthoritiesConstants.ADMIN).stream()
+                .filter(admin -> StringUtils.isNotBlank(admin.getEmail()))
+                .forEach(
+                    admin -> sendGridMailService.sendAdminVerificationEmail(admin, user.get(), baseUrl)
+                );
         }
     }
 

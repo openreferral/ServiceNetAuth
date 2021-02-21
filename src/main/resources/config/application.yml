@@ -172,3 +172,6 @@ jhipster:
 # application:
 registration:
   sender-address: ${REGISTRATION_SENDER_ADDRESS:servicenetaccounts@benetech.org}
+
+feedback:
+  receiver-address: ${FEEDBACK_RECEIVER_ADDRESS:feedback@benetech.org}
